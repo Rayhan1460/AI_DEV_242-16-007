@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { parseAndValidateRequirementsJson } from '../core/requirementsValidator';
 import type { RequirementsFile } from '../types/tender';
 import { SAMPLE_REQUIREMENTS_JSON } from '../data/sampleRequirements';
+import { useLanguage } from '../i18n/useLanguage';
 
 interface RequirementsLoaderProps {
   onLoaded: (data: RequirementsFile) => void;
@@ -9,6 +10,7 @@ interface RequirementsLoaderProps {
 }
 
 export const RequirementsLoader: React.FC<RequirementsLoaderProps> = ({ onLoaded, isLoaded }) => {
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -62,8 +64,8 @@ export const RequirementsLoader: React.FC<RequirementsLoaderProps> = ({ onLoaded
   return (
     <section className="card card-requirements-loader">
       <div className="card-header">
-        <h2 className="card-title">1. Requirements Configuration</h2>
-        <span className="step-tag">JSON Input</span>
+        <h2 className="card-title">{t.reqSectionTitle}</h2>
+        <span className="step-tag">{t.reqStepTag}</span>
       </div>
 
       <div
@@ -90,12 +92,12 @@ export const RequirementsLoader: React.FC<RequirementsLoaderProps> = ({ onLoaded
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           <p className="dropzone-text">
-            <strong>Choose requirements.json</strong> or drag & drop here
+            <strong>{t.reqDropzoneText.split(' or ')[0]}</strong> or drag & drop here
           </p>
-          <p className="dropzone-hint">Validates tender metadata, dates, and requirements hierarchy dynamically</p>
+          <p className="dropzone-hint">{t.reqDropzoneHint}</p>
           {fileName && (
             <div className="loaded-file-badge">
-              ✓ Loaded: <strong>{fileName}</strong>
+              ✓ {t.reqLoadedFile}: <strong>{fileName}</strong>
             </div>
           )}
         </div>
@@ -107,13 +109,13 @@ export const RequirementsLoader: React.FC<RequirementsLoaderProps> = ({ onLoaded
           className="btn btn-secondary btn-sm"
           onClick={handleLoadSample}
         >
-          Load Competition Sample Dataset
+          {t.reqLoadSampleBtn}
         </button>
       </div>
 
       {errorMessage && (
         <div className="alert alert-error">
-          <strong>Validation Error:</strong> {errorMessage}
+          <strong>{t.reqValidationError}:</strong> {errorMessage}
         </div>
       )}
     </section>

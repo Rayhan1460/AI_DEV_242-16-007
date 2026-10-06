@@ -4,6 +4,7 @@ import type { UploadedPdf } from '../types/pdf';
 import type { MatchingState } from '../types/matching';
 import type { RequirementEvaluation, RequirementStatusType } from '../types/status';
 import { getFileEligibilityForRequirement } from '../core/matchingModel';
+import { useLanguage } from '../i18n/useLanguage';
 
 interface RequirementsTableProps {
   requirements: Requirement[];
@@ -24,6 +25,25 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
   onUnmatch,
   onExpiryChange
 }) => {
+  const { language, t } = useLanguage();
+
+  const getStatusLabel = (status: RequirementStatusType): string => {
+    switch (status) {
+      case 'OK':
+        return t.statusOk;
+      case 'Not provided':
+        return t.statusNotProvided;
+      case 'Missing':
+        return t.statusMissing;
+      case 'Expiry date needed':
+        return t.statusExpiryNeeded;
+      case 'Expired':
+        return t.statusExpired;
+      default:
+        return status;
+    }
+  };
+
   const getBadgeClass = (status: RequirementStatusType) => {
     switch (status) {
       case 'OK':
@@ -44,20 +64,20 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
   return (
     <section className="card card-requirements-matching">
       <div className="card-header">
-        <h2 className="card-title">3. Document Matching & Verification</h2>
-        <span className="step-tag">Matching Engine</span>
+        <h2 className="card-title">{t.matchingSectionTitle}</h2>
+        <span className="step-tag">{t.matchingStepTag}</span>
       </div>
 
       <div className="table-wrapper">
         <table className="data-table requirements-table">
           <thead>
             <tr>
-              <th style={{ width: '60px' }}>#</th>
-              <th>Requirement Document</th>
-              <th style={{ width: '130px' }}>Type</th>
-              <th style={{ minWidth: '220px' }}>Matched PDF</th>
-              <th style={{ minWidth: '160px' }}>Expiry Date</th>
-              <th style={{ width: '170px' }}>Current Status</th>
+              <th style={{ width: '50px' }}>{t.colOrder}</th>
+              <th>{t.colRequirement}</th>
+              <th style={{ width: '130px' }}>{t.colType}</th>
+              <th style={{ minWidth: '220px' }}>{t.colMatchedPdf}</th>
+              <th style={{ minWidth: '160px' }}>{t.colExpiryDate}</th>
+              <th style={{ width: '170px' }}>{t.colCurrentStatus}</th>
             </tr>
           </thead>
           <tbody>
@@ -66,6 +86,10 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
               const evaluation = evaluations[req.id];
               const isMatched = !!currentFileId;
               const expiryValue = matchingState.expiryDates[req.id] || '';
+
+              // Primary & secondary titles based on language mode
+              const primaryTitle = language === 'bn' ? (req.title_bn || req.title_en) : req.title_en;
+              const secondaryTitle = language === 'bn' ? req.title_en : req.title_bn;
 
               return (
                 <tr
@@ -78,24 +102,24 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
 
                   <td className="cell-req-info">
                     <div className="req-header-row">
-                      <strong className="req-title-en">{req.title_en}</strong>
+                      <strong className="req-title-en">{primaryTitle}</strong>
                       <span className="req-id-tag">{req.id}</span>
                     </div>
-                    {req.title_bn && (
-                      <div className="req-title-bn">{req.title_bn}</div>
+                    {secondaryTitle && secondaryTitle !== primaryTitle && (
+                      <div className="req-title-bn">{secondaryTitle}</div>
                     )}
                   </td>
 
                   <td>
                     <div className="type-tags">
                       {req.mandatory ? (
-                        <span className="badge badge-mandatory">Mandatory</span>
+                        <span className="badge badge-mandatory">{t.mandatoryLabel.replace(':', '')}</span>
                       ) : (
-                        <span className="badge badge-optional">Optional</span>
+                        <span className="badge badge-optional">{t.optionalLabel.replace(':', '')}</span>
                       )}
                       {req.has_expiry && (
                         <span className="badge badge-has-expiry" title="Expiry date required if matched">
-                          Expires
+                          {t.expiresBadge}
                         </span>
                       )}
                     </div>
@@ -115,7 +139,7 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
                           }
                         }}
                       >
-                        <option value="">-- Select uploaded PDF --</option>
+                        <option value="">{t.selectPdfPrompt}</option>
                         {uploadedFiles.map((file) => {
                           const eligibility = getFileEligibilityForRequirement(
                             file,
@@ -148,7 +172,7 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
                           type="button"
                           className="btn btn-outline btn-xs btn-unmatch"
                           onClick={() => onUnmatch(req.id)}
-                          title="Undo match"
+                          title={t.undoMatchTooltip}
                         >
                           ✕
                         </button>
@@ -172,9 +196,9 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
                         />
                       </div>
                     ) : req.has_expiry && !isMatched ? (
-                      <span className="text-muted text-xs">Match file to set expiry</span>
+                      <span className="text-muted text-xs">{t.matchFileToSetExpiry}</span>
                     ) : (
-                      <span className="text-muted text-xs">N/A (No expiry)</span>
+                      <span className="text-muted text-xs">{t.noExpiryNeeded}</span>
                     )}
                   </td>
 
@@ -182,7 +206,7 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
                     {evaluation && (
                       <div className="status-cell-wrapper">
                         <span className={`badge-status ${getBadgeClass(evaluation.status)}`}>
-                          {evaluation.status}
+                          {getStatusLabel(evaluation.status)}
                         </span>
                         {evaluation.reason && (
                           <span className="status-reason-text" title={evaluation.reason}>

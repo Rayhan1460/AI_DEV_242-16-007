@@ -7,6 +7,7 @@ import {
 } from '../core/pdfService';
 import type { UploadedPdf } from '../types/pdf';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { useLanguage } from '../i18n/useLanguage';
 
 interface PdfUploaderProps {
   existingFiles: UploadedPdf[];
@@ -14,6 +15,7 @@ interface PdfUploaderProps {
 }
 
 export const PdfUploader: React.FC<PdfUploaderProps> = ({ existingFiles, onFilesAdded }) => {
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -109,14 +111,14 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ existingFiles, onFiles
   return (
     <section className="card card-pdf-uploader">
       <div className="card-header">
-        <h2 className="card-title">2. PDF Upload Foundation</h2>
-        <span className="step-tag">Multi-File PDF</span>
+        <h2 className="card-title">{t.pdfSectionTitle}</h2>
+        <span className="step-tag">{t.pdfStepTag}</span>
       </div>
 
       <div className="limits-dashboard">
         <div className="limit-meter">
           <div className="limit-meter-header">
-            <span>Files Uploaded:</span>
+            <span>{t.filesUploadedLabel}</span>
             <strong>{totalCount} / {MAX_FILES}</strong>
           </div>
           <div className="meter-track">
@@ -129,7 +131,7 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ existingFiles, onFiles
 
         <div className="limit-meter">
           <div className="limit-meter-header">
-            <span>Total Storage:</span>
+            <span>{t.totalStorageLabel}</span>
             <strong>{formatBytes(currentTotalBytes)} / 50 MB</strong>
           </div>
           <div className="meter-track">
@@ -167,12 +169,10 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ existingFiles, onFiles
             <line x1="9" y1="15" x2="15" y2="15" />
           </svg>
           <p className="dropzone-text">
-            <strong>Choose PDF Files</strong> or drag & drop here (Multiple allowed)
+            <strong>{t.pdfDropzoneText.split(' or ')[0]}</strong> or drag & drop here (Multiple allowed)
           </p>
-          <p className="dropzone-hint">
-            Validates PDF magic bytes, calculates SHA-256 hash, and detects exact duplicates
-          </p>
-          {isProcessing && <p className="text-loading">Analyzing and validating PDFs...</p>}
+          <p className="dropzone-hint">{t.pdfDropzoneHint}</p>
+          {isProcessing && <p className="text-loading">{t.analyzingPdfsText}</p>}
         </div>
       </div>
 
@@ -183,13 +183,13 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ existingFiles, onFiles
           onClick={handleGenerateSamplePdfs}
           disabled={isProcessing || totalCount >= MAX_FILES}
         >
-          Generate Sample Test PDFs (Includes 1 Content Duplicate)
+          {t.generatingSamplePdfsBtn}
         </button>
       </div>
 
       {errorMessage && (
         <div className="alert alert-error">
-          <strong>Upload Error:</strong> {errorMessage}
+          <strong>{t.uploadErrorLabel}:</strong> {errorMessage}
         </div>
       )}
     </section>

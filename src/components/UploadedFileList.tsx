@@ -2,6 +2,7 @@ import React from 'react';
 import type { UploadedPdf } from '../types/pdf';
 import type { MatchingState } from '../types/matching';
 import { formatBytes } from '../core/pdfService';
+import { useLanguage } from '../i18n/useLanguage';
 
 interface UploadedFileListProps {
   files: UploadedPdf[];
@@ -14,10 +15,12 @@ export const UploadedFileList: React.FC<UploadedFileListProps> = ({
   matchingState,
   onRemoveFile
 }) => {
+  const { t } = useLanguage();
+
   if (files.length === 0) {
     return (
       <div className="empty-files-placeholder">
-        <p>No PDF documents uploaded yet. Upload your PDF files above to begin matching.</p>
+        <p>{t.noPdfsUploaded}</p>
       </div>
     );
   }
@@ -34,13 +37,13 @@ export const UploadedFileList: React.FC<UploadedFileListProps> = ({
         <table className="data-table">
           <thead>
             <tr>
-              <th>File Name</th>
-              <th>Pages</th>
-              <th>Size</th>
-              <th>SHA-256 Hash</th>
-              <th>Status / Duplicate</th>
-              <th>Matched To</th>
-              <th className="text-right">Action</th>
+              <th>{t.colFileName}</th>
+              <th>{t.colPages}</th>
+              <th>{t.colSize}</th>
+              <th>{t.colHash}</th>
+              <th>{t.colDuplicate}</th>
+              <th>{t.colMatchedTo}</th>
+              <th className="text-right">{t.colAction}</th>
             </tr>
           </thead>
           <tbody>
@@ -54,7 +57,9 @@ export const UploadedFileList: React.FC<UploadedFileListProps> = ({
                     <span className="pdf-icon">📄</span>
                     <strong title={file.filename}>{file.filename}</strong>
                   </td>
-                  <td>{file.pageCount} {file.pageCount === 1 ? 'page' : 'pages'}</td>
+                  <td>
+                    {file.pageCount} {file.pageCount === 1 ? t.pageUnit : t.pagesUnit}
+                  </td>
                   <td>{formatBytes(file.size)}</td>
                   <td>
                     <code className="hash-code" title={`Full SHA-256:\n${file.sha256}`}>
@@ -67,17 +72,17 @@ export const UploadedFileList: React.FC<UploadedFileListProps> = ({
                         className="badge badge-warning"
                         title={`Duplicate content with: ${file.duplicateOf?.join(', ')}`}
                       >
-                        ⚠️ Duplicate Content
+                        {t.duplicateBadge}
                       </span>
                     ) : (
-                      <span className="badge badge-neutral">Unique</span>
+                      <span className="badge badge-neutral">{t.uniqueBadge}</span>
                     )}
                   </td>
                   <td>
                     {matchedReq ? (
-                      <span className="badge badge-matched">Matched: {matchedReq}</span>
+                      <span className="badge badge-matched">{t.matchedBadge} {matchedReq}</span>
                     ) : (
-                      <span className="text-muted">Unassigned</span>
+                      <span className="text-muted">{t.unassignedText}</span>
                     )}
                   </td>
                   <td className="text-right">
@@ -87,7 +92,7 @@ export const UploadedFileList: React.FC<UploadedFileListProps> = ({
                       onClick={() => onRemoveFile(file.id)}
                       title="Remove file and clean matching state"
                     >
-                      Remove
+                      {t.removeBtn}
                     </button>
                   </td>
                 </tr>

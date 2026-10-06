@@ -17,9 +17,12 @@ import {
 } from './core/matchingModel';
 import { refreshDuplicateStatuses } from './core/pdfService';
 import { calculateStatusSummary } from './core/statusEngine';
+import { LanguageProvider } from './i18n/LanguageContext';
+import { useLanguage } from './i18n/useLanguage';
 import './App.css';
 
-export const App: React.FC = () => {
+const MainAppContent: React.FC = () => {
+  const { t } = useLanguage();
   const [requirementsData, setRequirementsData] = useState<RequirementsFile | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedPdf[]>([]);
   const [matchingState, setMatchingState] = useState<MatchingState>({
@@ -130,8 +133,8 @@ export const App: React.FC = () => {
 
             <section className="card card-uploaded-files">
               <div className="card-header">
-                <h2 className="card-title">Uploaded PDF Documents</h2>
-                <span className="step-tag">{uploadedFiles.length} / 30 Files</span>
+                <h2 className="card-title">{t.uploadedFilesTitle}</h2>
+                <span className="step-tag">{uploadedFiles.length} / 30 {t.colPages.toLowerCase()}</span>
               </div>
               <UploadedFileList
                 files={uploadedFiles}
@@ -155,6 +158,10 @@ export const App: React.FC = () => {
             />
 
             <BlockingSummary
+              tender={requirementsData.tender}
+              requirements={requirementsData.requirements}
+              uploadedFiles={uploadedFiles}
+              matchingState={matchingState}
               summary={statusSummary}
               hasRequirements={requirementsData.requirements.length > 0}
             />
@@ -163,10 +170,18 @@ export const App: React.FC = () => {
       </main>
 
       <footer className="app-footer">
-        <p>Tender Document Package Builder • Stage 1 Core Foundation</p>
-        <p className="footer-subtext">All processing takes place in browser memory • No external services used</p>
+        <p>{t.footerTitle}</p>
+        <p className="footer-subtext">{t.footerSubtitle}</p>
       </footer>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <MainAppContent />
+    </LanguageProvider>
   );
 };
 
