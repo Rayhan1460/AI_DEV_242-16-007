@@ -35,15 +35,15 @@ export const BlockingSummary: React.FC<BlockingSummaryProps> = ({
   const getStatusLabel = (status: RequirementStatusType): string => {
     switch (status) {
       case 'OK':
-        return t.statusOk;
+        return `✓ ${t.statusOk}`;
       case 'Not provided':
-        return t.statusNotProvided;
+        return `○ ${t.statusNotProvided}`;
       case 'Missing':
-        return t.statusMissing;
+        return `✕ ${t.statusMissing}`;
       case 'Expiry date needed':
-        return t.statusExpiryNeeded;
+        return `📅 ${t.statusExpiryNeeded}`;
       case 'Expired':
-        return t.statusExpired;
+        return `⌛ ${t.statusExpired}`;
       default:
         return status;
     }

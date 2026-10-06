@@ -1,12 +1,13 @@
-import React from 'react';
-import type { Requirement } from '../types/tender';
+import type { Requirement, Tender } from '../types/tender';
 import type { UploadedPdf } from '../types/pdf';
 import type { MatchingState } from '../types/matching';
 import type { RequirementEvaluation, RequirementStatusType } from '../types/status';
 import { getFileEligibilityForRequirement } from '../core/matchingModel';
+import { generateChecklistCsv, downloadChecklistCsv } from '../core/checklistExport';
 import { useLanguage } from '../i18n/useLanguage';
 
 interface RequirementsTableProps {
+  tender: Tender;
   requirements: Requirement[];
   uploadedFiles: UploadedPdf[];
   matchingState: MatchingState;
@@ -17,6 +18,7 @@ interface RequirementsTableProps {
 }
 
 export const RequirementsTable: React.FC<RequirementsTableProps> = ({
+  tender,
   requirements,
   uploadedFiles,
   matchingState,
@@ -27,18 +29,23 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
 }) => {
   const { language, t } = useLanguage();
 
+  const handleExportCsv = () => {
+    const csv = generateChecklistCsv(tender, requirements, matchingState, uploadedFiles, evaluations);
+    downloadChecklistCsv(csv, tender.tender_id);
+  };
+
   const getStatusLabel = (status: RequirementStatusType): string => {
     switch (status) {
       case 'OK':
-        return t.statusOk;
+        return `✓ ${t.statusOk}`;
       case 'Not provided':
-        return t.statusNotProvided;
+        return `○ ${t.statusNotProvided}`;
       case 'Missing':
-        return t.statusMissing;
+        return `✕ ${t.statusMissing}`;
       case 'Expiry date needed':
-        return t.statusExpiryNeeded;
+        return `📅 ${t.statusExpiryNeeded}`;
       case 'Expired':
-        return t.statusExpired;
+        return `⌛ ${t.statusExpired}`;
       default:
         return status;
     }
@@ -65,7 +72,17 @@ export const RequirementsTable: React.FC<RequirementsTableProps> = ({
     <section className="card card-requirements-matching">
       <div className="card-header">
         <h2 className="card-title">{t.matchingSectionTitle}</h2>
-        <span className="step-tag">{t.matchingStepTag}</span>
+        <div className="card-header-actions">
+          <button
+            type="button"
+            className="btn btn-secondary btn-xs"
+            onClick={handleExportCsv}
+            title={t.btnExportChecklistCsv}
+          >
+            📋 {t.btnExportChecklistCsv}
+          </button>
+          <span className="step-tag">{t.matchingStepTag}</span>
+        </div>
       </div>
 
       <div className="table-wrapper">

@@ -59,6 +59,7 @@ export interface Translations {
   // Requirements Table
   matchingSectionTitle: string;
   matchingStepTag: string;
+  btnExportChecklistCsv: string;
   colOrder: string;
   colRequirement: string;
   colType: string;
@@ -160,6 +161,7 @@ export const translations: Record<Language, Translations> = {
 
     matchingSectionTitle: '3. Document Matching & Verification',
     matchingStepTag: 'Matching Engine',
+    btnExportChecklistCsv: 'Export Checklist CSV',
     colOrder: '#',
     colRequirement: 'Requirement Document',
     colType: 'Type',
@@ -255,6 +257,7 @@ export const translations: Record<Language, Translations> = {
 
     matchingSectionTitle: '৩. নথি সংযোজন ও মেয়াদ যাচাইকরণ',
     matchingStepTag: 'ম্যাচিং ইঞ্জিন',
+    btnExportChecklistCsv: 'চেকলিস্ট CSV এক্সপোর্ট',
     colOrder: '#',
     colRequirement: 'প্রয়োজনীয় নথি',
     colType: 'ধরণ',

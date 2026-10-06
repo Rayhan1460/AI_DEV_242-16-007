@@ -9,6 +9,7 @@ import { PdfUploader } from './components/PdfUploader';
 import { UploadedFileList } from './components/UploadedFileList';
 import { RequirementsTable } from './components/RequirementsTable';
 import { BlockingSummary } from './components/BlockingSummary';
+import { WorkflowStepper } from './components/WorkflowStepper';
 import {
   matchFileToRequirement,
   unmatchRequirement,
@@ -17,13 +18,30 @@ import {
 } from './core/matchingModel';
 import { refreshDuplicateStatuses } from './core/pdfService';
 import { calculateStatusSummary } from './core/statusEngine';
+import { parseAndValidateRequirementsJson } from './core/requirementsValidator';
+import { SAMPLE_REQUIREMENTS_JSON } from './data/sampleRequirements';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { useLanguage } from './i18n/useLanguage';
 import './App.css';
 
 const MainAppContent: React.FC = () => {
   const { t } = useLanguage();
-  const [requirementsData, setRequirementsData] = useState<RequirementsFile | null>(null);
+  const [requirementsData, setRequirementsData] = useState<RequirementsFile | null>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('sample') === 'true') {
+          const res = parseAndValidateRequirementsJson(SAMPLE_REQUIREMENTS_JSON);
+          if (res.success && res.data) {
+            return res.data;
+          }
+        }
+      }
+    } catch {
+      // Ignore
+    }
+    return null;
+  });
   const [uploadedFiles, setUploadedFiles] = useState<UploadedPdf[]>([]);
   const [matchingState, setMatchingState] = useState<MatchingState>({
     matches: {},
@@ -92,11 +110,24 @@ const MainAppContent: React.FC = () => {
     setMatchingState((prev) => setRequirementExpiry(prev, requirementId, expiryDate));
   };
 
+  const okCount = useMemo(() => {
+    return Object.values(statusSummary.evaluations).filter((ev) => ev.status === 'OK').length;
+  }, [statusSummary.evaluations]);
+
   return (
     <div className="app-layout">
       <Header />
 
       <main className="main-content">
+        <WorkflowStepper
+          hasRequirements={!!requirementsData}
+          uploadedFilesCount={uploadedFiles.length}
+          totalRequirements={requirementsData?.requirements.length || 0}
+          okCount={okCount}
+          blockingCount={statusSummary.blockingCount}
+          canGeneratePackage={statusSummary.canGeneratePackage}
+        />
+
         {alertError && (
           <div className="alert alert-error global-alert">
             <span>⚠️ {alertError}</span>
@@ -148,6 +179,7 @@ const MainAppContent: React.FC = () => {
         {requirementsData && (
           <>
             <RequirementsTable
+              tender={requirementsData.tender}
               requirements={requirementsData.requirements}
               uploadedFiles={uploadedFiles}
               matchingState={matchingState}
